@@ -2,7 +2,6 @@ import re
 import datetime
 from django.template.defaultfilters import slugify
 from django.db.models import SlugField, SubfieldBase
-from south.modelsinspector import add_introspection_rules
 
 class AutoSlugField(SlugField):
     """ AutoSlugField
@@ -24,10 +23,10 @@ class AutoSlugField(SlugField):
 
     recursive
         If set, track callable/field recursively and prepend to slug
-    
+
     use_recursive_slug
         If set, when recursive is enabled it will prepend only slug from first recursive item
-    
+
     prefix_from
         If set, prepend to slug
 
@@ -167,11 +166,27 @@ class AutoSlugField(SlugField):
     def get_internal_type(self):
         return "SlugField"
 
-add_introspection_rules(
-    [(
-        [AutoSlugField],
-        [],
-        {'populate_from': ["_populate_from", {}], 'recursive': ["recursive", {}]}
-    )],
-    ["^django_autoslug\.fields\.AutoSlugField"]
-)
+    def deconstruct(self):
+        name, path, args, kwargs = super(AutoSlugField, self).deconstruct()
+        kwargs.update({
+            'populate_from': repr(self._populate_from),
+            'separator': repr(self.separator),
+            'overwrite': repr(self.overwrite),
+            'recursive': repr(self.recursive),
+            'use_recursive_slug': repr(self.use_recursive_slug),
+        })
+        return name, path, args, kwargs
+
+try:
+    from south.modelsinspector import add_introspection_rules
+
+    add_introspection_rules(
+        [(
+            [AutoSlugField],
+            [],
+            {'populate_from': ["_populate_from", {}], 'recursive': ["recursive", {}]}
+        )],
+        ["^django_autoslug\.fields\.AutoSlugField"]
+    )
+except ImportError as e:
+    pass
