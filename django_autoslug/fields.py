@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import datetime
 from django.template.defaultfilters import slugify
@@ -69,7 +70,7 @@ class AutoSlugField(SlugField):
     def slugify_func(self, content):
         try:
             from pytils.translit import translify
-            content = translify(content)
+            content = translify(content.replace(u'đ', 'd').replace(u'Đ', 'd'))
         except:
             pass
 
